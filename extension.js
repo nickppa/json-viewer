@@ -12,40 +12,48 @@ const { parseJson, format } = require('./utils/json-util');
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
-    // Use the console to output diagnostic information (console.log) and errors (console.error)
-    // This line of code will only be executed once when your extension is activated
-    // if(!vscode.window.activeTextEditor) {
-    //     console.log('No active text editor!');
-    //     return;
-    // }
-    console.log('Congratulations, your extension "json-viewer" is now active!');
+    const changeTextEditorDisposable = vscode.window.onDidChangeActiveTextEditor(editor => {
+        if (editor?.document) {
+            const panel = ReactPanel.getExistedPanel(context.extensionPath, editor);
+            if (panel) {
+                panel._panel.reveal(vscode.ViewColumn.Beside, true);
+            } else if (ReactPanel.currentPanel) {
+                ReactPanel.currentPanel.hide();
+            }
+        }
+    });
+
+    const closeDocumentDisposable = vscode.workspace.onDidCloseTextDocument(document => {
+        ReactPanel.closeWindowForDocument(document);
+    });
 
     const onChangeDisposable = vscode.workspace.onDidChangeTextDocument(event => {
-        if (ReactPanel.currentPanel._editor.document === event.document) {
-            ReactPanel.currentPanel.textChanged();
+        const panel = ReactPanel.currentPanel;
+        if (panel) {
+            panel.textChanged();
         }
     });
 
     const onChangeSelectionDisposable = vscode.window.onDidChangeTextEditorSelection(event => {
-        const editor = event.textEditor;
-        if (ReactPanel.currentPanel._editor === editor) {
-            ReactPanel.currentPanel.jumpToNode(editor.selection);
+        const panel = ReactPanel.currentPanel;
+        if (panel) {
+            panel.jumpToNode(event.textEditor.selection);
         }
     });
 
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with  registerCommand
-    // The commandId parameter must match the command field in package.json
-    const disposable = vscode.commands.registerCommand('json-viewer.jsonViewer', function () {
-        // The code you place here will be executed every time your command is executed
+    const registerDisposable = vscode.commands.registerCommand('oh-my-json-viewer.jsonViewer', function () {
         if (vscode.window.activeTextEditor) {
             ReactPanel.createOrShow(context.extensionPath, vscode.window.activeTextEditor);
-            // // Display a message box to the user
-            // vscode.window.showInformationMessage('Hello VS Code');
         }
     });
 
-    context.subscriptions.push(onChangeDisposable, onChangeSelectionDisposable, disposable);
+    context.subscriptions.push(
+        changeTextEditorDisposable,
+        closeDocumentDisposable,
+        onChangeDisposable,
+        onChangeSelectionDisposable,
+        registerDisposable
+    );
 }
 
 // This method is called when your extension is deactivated
@@ -58,29 +66,124 @@ class ReactPanel {
     /**
      * Track the currently panel. Only allow a single panel to exist at a time.
      */
-    static currentPanel;
-
-    static viewType = 'react';
+    static allPanels = [];
+    static viewType = 'json-viewer';
+    static currentPanel = null;
 
     _panel;
     _extensionPath;
     _disposables = [];
     _reactLoaded = false;
     _editor = null;
+    _isHiding = false;
 
     refRangeChanged = null;
     refIsValid = false;
     jsonDataRef = EMPTYOBJ;
 
+    static getExistedPanel(extensionPath, editor) {
+        if (!editor.document) return null;
+        const filePath = editor.document.uri.toString();
+        if (ReactPanel.allPanels.includes(filePath)) {
+            if (ReactPanel.currentPanel && ReactPanel.currentPanel._panel) {
+                ReactPanel.currentPanel._editor = editor;
+                ReactPanel.currentPanel.textChanged();
+                return ReactPanel.currentPanel;
+            }
+            ReactPanel.createOrShow(extensionPath, editor);
+            return ReactPanel.currentPanel;
+        }
+        return null;
+    }
+
+    static closeWindowForDocument(document) {
+        const filePath = document.uri.toString();
+        if (ReactPanel.allPanels.includes(filePath)) {
+            ReactPanel.allPanels = ReactPanel.allPanels.filter(x => x !== filePath);
+        }
+    }
+
     static createOrShow(extensionPath, editor) {
         // If we already have a panel, show it.
         // Otherwise, create a new panel.
-        if (ReactPanel.currentPanel) {
-            ReactPanel.currentPanel._panel.reveal();
+        if (ReactPanel.currentPanel && ReactPanel.currentPanel._panel) {
+            ReactPanel.currentPanel._panel.reveal(vscode.ViewColumn.Beside, true);
         } else {
             ReactPanel.currentPanel = new ReactPanel(extensionPath, editor);
+            const filePath = editor.document.uri.toString();
+            ReactPanel.allPanels.push(filePath);
         }
     }
+
+    constructor(extensionPath, editor) {
+        this._extensionPath = extensionPath;
+        this._editor = editor;
+
+        // Create and show a new webview panel
+        this._panel = vscode.window.createWebviewPanel(
+            ReactPanel.viewType,
+            'json-viewer',
+            { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
+            {
+                // Enable javascript in the webview
+                enableScripts: true,
+
+                // And restric the webview to only loading content from our extension's `media` directory.
+                localResourceRoots: [vscode.Uri.file(path.join(this._extensionPath, 'build'))],
+            }
+        );
+
+        // Set the webview's initial html content
+        this._panel.webview.html = this._getHtmlForWebview(this._panel.webview);
+
+        // Listen for when the panel is disposed
+        // This happens when the user closes the panel or when the panel is closed programatically
+        this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
+
+        // Handle messages from the webview
+        this._panel.webview.onDidReceiveMessage(
+            message => {
+                switch (message.command) {
+                    case 'alert':
+                        vscode.window.showErrorMessage(message.text);
+                        return;
+                    case 'copy':
+                        vscode.env.clipboard.writeText(message.text).then(() => {
+                            vscode.window.showInformationMessage('Copied!');
+                        });
+                        return;
+                    case 'selectRange':
+                        this.selectRange(message.node);
+                        //
+                        return;
+                    case 'reactLoaded':
+                        this._reactLoaded = true;
+                        this.textChanged();
+                        return;
+                    case 'format':
+                        this.handleFormat();
+                        return;
+                    case 'minifyFormat':
+                        this.handleMinifyFormat();
+                        return;
+                    case 'minifyFormatString':
+                        this.handleMinifyFormatString();
+                        return;
+                    case 'copyText':
+                        this.handleCopyText();
+                        return;
+                }
+            },
+            null,
+            this._disposables
+        );
+    }
+
+    hide = () => {
+        this._isHiding = true;
+        this._panel.dispose();
+        this._isHiding = false;
+    };
 
     changeJsonData = jsonData => {
         this._panel.webview.postMessage({ command: 'changeJsonData', jsonData });
@@ -199,6 +302,7 @@ class ReactPanel {
         );
         this._editor.edit(editBuilder => {
             editBuilder.replace(fullRange, text);
+            vscode.window.showInformationMessage('Formatted!');
         });
     };
 
@@ -223,65 +327,6 @@ class ReactPanel {
             vscode.window.showInformationMessage('Copied!');
         });
     };
-
-    constructor(extensionPath, editor) {
-        this._extensionPath = extensionPath;
-        this._editor = editor;
-
-        // Create and show a new webview panel
-        this._panel = vscode.window.createWebviewPanel(ReactPanel.viewType, 'json-viewer', vscode.ViewColumn.Beside, {
-            // Enable javascript in the webview
-            enableScripts: true,
-
-            // And restric the webview to only loading content from our extension's `media` directory.
-            localResourceRoots: [vscode.Uri.file(path.join(this._extensionPath, 'build'))],
-        });
-
-        // Set the webview's initial html content
-        this._panel.webview.html = this._getHtmlForWebview(this._panel.webview);
-
-        // Listen for when the panel is disposed
-        // This happens when the user closes the panel or when the panel is closed programatically
-        this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
-
-        // Handle messages from the webview
-        this._panel.webview.onDidReceiveMessage(
-            message => {
-                switch (message.command) {
-                    case 'alert':
-                        vscode.window.showErrorMessage(message.text);
-                        return;
-                    case 'copy':
-                        vscode.env.clipboard.writeText(message.text).then(() => {
-                            vscode.window.showInformationMessage('Copied!');
-                        });
-                        return;
-                    case 'selectRange':
-                        this.selectRange(message.node);
-                        //
-                        return;
-                    case 'reactLoaded':
-                        this._reactLoaded = true;
-                        this.textChanged();
-                        return;
-                    case 'format':
-                        this.handleFormat();
-                        return;
-                    case 'minifyFormat':
-                        this.handleMinifyFormat();
-                        return;
-                    case 'minifyFormatString':
-                        this.handleMinifyFormatString();
-                        return;
-                    case 'copyText':
-                        this.handleCopyText();
-                        return;
-                }
-            },
-            null,
-            this._disposables
-        );
-    }
 
     setAnnotations = arr => {};
 
@@ -339,10 +384,14 @@ class ReactPanel {
     }, 300);
 
     dispose() {
-        ReactPanel.currentPanel = undefined;
-
+        if (!this._isHiding) {
+            ReactPanel.allPanels = ReactPanel.allPanels.filter(x => x !== this._editor.document.uri.toString());
+        } else {
+            ReactPanel.currentPanel = null;
+        }
         // Clean up our resources
         this._panel.dispose();
+        this._panel = null;
 
         while (this._disposables.length) {
             const x = this._disposables.pop();

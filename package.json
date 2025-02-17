@@ -1,56 +1,64 @@
 {
-  "name": "json-viewer",
-  "displayName": "json-viewer",
-  "description": "Our JSON Viewer is a user-friendly tool for viewing, searching, and navigating JSON data. It supports syntax highlighting, tree and raw views, and a path viewer for quick access to elements.",
-  "version": "0.0.1",
-  "engines": {
-    "vscode": "^1.97.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [],
-  "main": "./extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "json-viewer.jsonViewer",
-        "title": "json viewer"
-      }
-    ]
-  },
-  "scripts": {
-    "vscode:prepublish": "node ./scripts/build-non-split.js",
-    "start": "react-scripts start",
-    "build": "node ./scripts/build-non-split.js",
-    "test": "react-scripts test"
-  },
-  "devDependencies": {
-    "@types/vscode": "^1.97.0",
-    "@types/mocha": "^10.0.10",
-    "@types/node": "20.x",
-    "eslint": "^9.19.0",
-    "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.4.1",
-    "@ant-design/icons": "^5.0.1",
-    "antd": "^5.3.0",
-    "lodash.debounce": "^4.0.8",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "rewire": "^6.0.0",
-    "sass": "^1.59.2"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+    "name": "oh-my-json-viewer",
+    "displayName": "oh-my-json-viewer",
+    "description": "Our JSON Viewer is a user-friendly tool for viewing, searching, and navigating JSON data. It supports syntax highlighting, tree and raw views, and a path viewer for quick access to elements.",
+    "publisher": "nickppa",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nickppa/json-viewer.git"
+    },
+    "license": "MIT",
+    "version": "1.0.0",
+    "engines": {
+        "vscode": "^1.97.0"
+    },
+    "categories": [
+        "Other"
     ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+    "activationEvents": [],
+    "main": "./extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "oh-my-json-viewer.jsonViewer",
+                "title": "oh my json viewer"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "node ./scripts/build-non-split.js",
+        "start": "react-scripts start",
+        "build": "node ./scripts/build-non-split.js",
+        "test": "react-scripts test"
+    },
+    "dependencies": {
+        "lodash.debounce": "^4.0.8"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.97.0",
+        "@types/mocha": "^10.0.10",
+        "@types/node": "20.x",
+        "eslint": "^9.19.0",
+        "@vscode/test-cli": "^0.0.10",
+        "@vscode/test-electron": "^2.4.1",
+        "@ant-design/icons": "^5.0.1",
+        "antd": "^5.3.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-scripts": "5.0.1",
+        "rewire": "^6.0.0",
+        "sass": "^1.59.2"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    }
 }

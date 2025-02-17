@@ -364,10 +364,6 @@ const JsonViewer = forwardRef(({ jsonData, height, onSelectNode, onChangeState, 
 
     const handleCopyPath = () => {
         copyToClipboard(path);
-        messageApi.open({
-            type: 'success',
-            content: 'Copied!',
-        });
     };
 
     const handleChangeMatchCase = () => {
@@ -495,10 +491,10 @@ const JsonViewer = forwardRef(({ jsonData, height, onSelectNode, onChangeState, 
             <div className="tool-bar">
                 <Space size={4}>
                     <Tooltip title="Collapse All">
-                        <Button onClick={handleCollapseAll} icon={<MinusSquareOutlined />} />
+                        <Button onClick={handleCollapseAll} icon={<PlusSquareOutlined />} />
                     </Tooltip>
                     <Tooltip title="Expand All">
-                        <Button onClick={handleExpandAll} icon={<PlusSquareOutlined />} />
+                        <Button onClick={handleExpandAll} icon={<MinusSquareOutlined />} />
                     </Tooltip>
                     <Tooltip title="Copy Full Path">
                         <Button onClick={handleCopyPath} icon={<CopyOutlined />} />
