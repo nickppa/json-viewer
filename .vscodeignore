@@ -13,3 +13,4 @@ oh-my-json-viewer.gif
 src/**
 scripts/**
 public/**
+.env.production
