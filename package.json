@@ -1,7 +1,7 @@
 {
     "name": "oh-my-json-viewer",
     "displayName": "oh-my-json-viewer",
-    "icon": "media/icon.png",
+    "icon": "media/icon128.png",
     "description": "Oh My JSON Viewer is a user-friendly tool for viewing, searching, and navigating JSON data. It supports syntax highlighting, tree and raw views, and a path viewer for quick access to elements.",
     "publisher": "nickppa",
     "repository": {
