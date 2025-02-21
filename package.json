@@ -1,14 +1,15 @@
 {
     "name": "oh-my-json-viewer",
     "displayName": "oh-my-json-viewer",
-    "description": "Our JSON Viewer is a user-friendly tool for viewing, searching, and navigating JSON data. It supports syntax highlighting, tree and raw views, and a path viewer for quick access to elements.",
+    "icon": "media/icon.png",
+    "description": "Oh My JSON Viewer is a user-friendly tool for viewing, searching, and navigating JSON data. It supports syntax highlighting, tree and raw views, and a path viewer for quick access to elements.",
     "publisher": "nickppa",
     "repository": {
         "type": "git",
         "url": "https://github.com/nickppa/json-viewer.git"
     },
     "license": "MIT",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "engines": {
         "vscode": "^1.97.0"
     },
@@ -23,7 +24,16 @@
                 "command": "oh-my-json-viewer.jsonViewer",
                 "title": "oh my json viewer"
             }
-        ]
+        ],
+        "menus": {
+          "editor/context": [
+            {
+              "command": "oh-my-json-viewer.jsonViewer",
+              "when": "editorLangId == json",
+              "group": "z_other"
+            }
+          ]
+        }
     },
     "scripts": {
         "vscode:prepublish": "node ./scripts/build-non-split.js",

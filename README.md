@@ -1,6 +1,6 @@
-# json-viewer README
+# oh-my-json-viewer
 
-Our JSON Viewer is a user-friendly tool for viewing, searching, and navigating JSON data. It supports syntax highlighting, tree and raw views, and a path viewer for quick access to elements.
+Oh My JSON Viewer is a user-friendly tool for viewing, searching, and navigating JSON data. It supports syntax highlighting, tree and raw views, and a path viewer for quick access to elements.
 
 ## Features
 

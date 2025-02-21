@@ -137,7 +137,6 @@ const JsonViewer = forwardRef(({ jsonData, height, onSelectNode, onChangeState, 
         setJsonTree(setIcon(jsonData.data));
         refTexts.current = jsonData.texts;
         refKeys.current = jsonData.keys;
-        console.log(jsonData);
         refLastLevelKeys.current = [...jsonData.lastLevelKeys];
         if (!refStateChanged.current) {
             handleSearch(false);
@@ -153,8 +152,12 @@ const JsonViewer = forwardRef(({ jsonData, height, onSelectNode, onChangeState, 
                 if (ss.searchText) {
                     handleChangeSearchText(ss.searchText);
                 }
-                if (ss.expandedKeys) {
+                if (ss.expandedKeys && ss.expandedKeys.length) {
                     setExpandedKeys(ss.expandedKeys);
+                } else {
+                    if (jsonData.data[0]) {
+                        setExpandedKeys([jsonData.data[0].key]);
+                    }
                 }
                 if (ss.selectedKey) {
                     setPath(ss.selectedKey);
@@ -274,6 +277,9 @@ const JsonViewer = forwardRef(({ jsonData, height, onSelectNode, onChangeState, 
     const setSearchedInfo = isScroll => {
         if (!refSearchResult.current || !refSearchResult.current.length) return;
         selectCurrentText(isScroll);
+        if(refFindIndex.current == undefined) {
+            refFindIndex.current = -1;
+        }
         setSearchInfo(`${Math.max(0, refFindIndex.current) + 1} of ${refSearchResult.current.length}`);
     };
 
@@ -314,6 +320,9 @@ const JsonViewer = forwardRef(({ jsonData, height, onSelectNode, onChangeState, 
 
     const selectCurrentText = isScroll => {
         if (refFindIndex.current === -1) {
+            return;
+        }
+        if (!refSearchResult.current[refFindIndex.current]) {
             return;
         }
         const { i } = refSearchResult.current[refFindIndex.current];

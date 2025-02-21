@@ -100,6 +100,9 @@ class ReactPanel {
         const filePath = document.uri.toString();
         if (ReactPanel.allPanels.includes(filePath)) {
             ReactPanel.allPanels = ReactPanel.allPanels.filter(x => x !== filePath);
+            if (!ReactPanel.allPanels.length && ReactPanel.currentPanel._panel) {
+                ReactPanel.currentPanel._panel.dispose();
+            }
         }
     }
 
@@ -145,7 +148,7 @@ class ReactPanel {
             message => {
                 switch (message.command) {
                     case 'alert':
-                        vscode.window.showErrorMessage(message.text);
+                        vscode.window.showInformationMessage(message.text);
                         return;
                     case 'copy':
                         vscode.env.clipboard.writeText(message.text).then(() => {
@@ -358,7 +361,7 @@ class ReactPanel {
                       ]
                     : EMPTYARR;
             this.setAnnotations(EMPTYARR);
-            vscode.window.showErrorMessage('Error in text');
+            vscode.window.showInformationMessage('Error in text');
             setTimeout(() => this.setAnnotations(annotations));
             return undefined;
         }

@@ -39,7 +39,7 @@ function setObjValue(currentObj, key, value, startPos) {
     if (isArray) {
         currentObj.push(value);
     } else {
-        if (!key) {
+        if (!key && key !== '') {
             throw new JsonException({ message: 'no key', ...startPos });
         }
         if (currentObj.hasOwnProperty(key)) {
