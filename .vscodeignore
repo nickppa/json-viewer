@@ -8,3 +8,8 @@ vsc-extension-quickstart.md
 **/*.map
 **/eslint.config.mjs
 **/.vscode-test.*
+*.vsix
+oh-my-json-viewer.gif
+src/**
+scripts/**
+public/**

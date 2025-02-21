@@ -1,24 +1,14 @@
 # oh-my-json-viewer
-
-Oh My JSON Viewer is a user-friendly tool for viewing, searching, and navigating JSON data. It supports syntax highlighting, tree and raw views, and a path viewer for quick access to elements.
+---
+![Extension Demo](https://raw.githubusercontent.com/nickppa/json-viewer/main/oh-my-json-viewer.gif)
 
 ## Features
 
-Our JSON Viewer is a user-friendly tool for viewing, searching, and navigating JSON data. It supports syntax highlighting, tree and raw views, and a path viewer for quick access to elements.
+This extension offers features such as synchronized document position, node search, JSON formatting, and JSON minimization.
 
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of json-viewer
-
----
+- **Synchronized Document Position**: Keeps the position in the document synchronized across different views or sections.
+- **Node Search**: Allows searching for specific nodes within a structured document or code.
+- **JSON Formatting**: Automatically formats JSON data into a more readable structure with proper indentation.
+- **JSON Minimization**: Compresses JSON data by removing unnecessary spaces and line breaks, making it more compact.
 
 **Enjoy!**
